@@ -1,194 +1,148 @@
-imgo
-========
-Advanced images optimizer
+# imgo
+imgo is a tool for automated lossless image optimization. Run it in a folder with images to reduce file sizes to a minimum.
 
-Оптимизатор изображений
+While developing this utility, we came to a conclusion that manual tuning of compression options might be quite effective sometimes; this is why imgo does not totally automate the optimization process. Instead, the tool provides a number of options you can try to get the best result, and automates image analysis to choose the best compression technique.
 
-Статья \ Article
----------------------------
-* Ru: [Как пользоваться Imgo](https://github.com/imgo/imgo/wiki/imgo-ru "Как пользоваться Imgo")
-* En: [Imgo User Guide](https://github.com/imgo/imgo/wiki "Imgo User Guide")
+## Usage
 
-Поддерживаемые форматы
----------------------------
-* png
-* jpeg, jpg
-* gif
+`imgo .` Run imgo with a dot as a parameter (`.`) to process all images (png, gif and jpg files) that could be found in the current folder and its subfolders, recursively.
 
-Использование
----------------------------
-* "imgo ." если запустить программу c точкой, в качестве параметра, то она рекурсивно будет искать все файлы (*.png, *.gif, *.jpg, *.jpeg) в текущей директории и всех поддиректориях, лежащих ниже, и попытается сжать их
-* "imgo file.png" в качестве атрибута поддерживается  имя сжимаемого файла
-* "imgo file.png file2.gif" вместо одного файла можно указать несколько, через пробел
+It is also possible to pass one or several file names and/or folder names:
 
-Об уровнях сжатия
----------------------------
-Уровни сжатия imgo можно условно разделить на 3 степени (это справедливо для формата PNG):
+* `imgo file.png`
+* `imgo file.png file.jpg file.gif`
+* `imgo file.png folder folder-2`
 
-* "imgo file.png" базовый уровень сжатия (используется по умолчанию), работает относительно быстро, применяет "безопасные" преобразования, рекомендуется использовать на файлах, которые будут открываться c помощью IE6;
-* "imgo -b file.png" продвинутый уровень сжатия (вызывается параметром -b или -brute), применяется весь набор преобразований, опасен же тем, что некоторые файлы (с прозрачностью) могут некорректно отображаться в IE6;
-* "imgo -m -b file.png" достигается за счет многократного сжатия файла (вызывается параметром -m или -multipass). Замечено, что при дополнительном проходе можно сжать файл сильнее, обычно счет идет на байты и доли процента.
+## Compression levels
 
-Расширенное использование
----------------------------
-* "imgo -h", "imgo --help"  - вывести справку
-* "imgo -b", "imgo --brute" - перейти в режим продвинутого сжатия, опасен для IE6, сжимает лучше, но раза в 2-3 медленнее
-* "imgo -png" - при рекурсивном обходе папки и ее поддиректорий обрабатывать только *.png файлы
-* "imgo -jpg" - при рекурсивном обходе папки и ее поддиректорий обрабатывать только *.jpg и *.jpeg файлы
-* "imgo -e", "imgo --emulate" - включение режима эмуляции, исходные файлы перезаписаны не будут, будет выведена только информация о том, насколько можно сжать файл\файлы
-* "imgo -m", "imgo --multipass" - если файл удалось сжать, он будет обработан повторно, до тех пор, пока эффективность сжатия не будет равна 0
-* "imgo -q", "imgo --quiet" - скрытый режим, никакой информации выведено не будет
-* "imgo -V", "imgo --version" - выведет на экран версию скрипта
-* "imgo -d", "imgo --diff" - после сжатия выводит на экран информацию (различия) между оригинальным файлом и сжатым (экспериментальная функция)
-* "imgo -v", "imgo --log" - выводит на экран дополнительную информацию, применяется в отладочных целях
+For PNG file format, various compression rates that imgo provides can be categorized into 3 levels:
 
-Плюшки
----------------------------
-* "imgo -s", "imgo --separate" данная команда отрабатывает на файлах PNG24+Alpha, она создает дополнительно 3 файла. Первый - содержит все непрозрачные области (filename_imgcocmp_corp.png), второй - содержит все полупрозрачные области (filename_imgcocmp_alpha.png), третий - это конвертация первого файла в PNG8, с потерей качества!!! (filename_imgcocmp_corp-nq8.png). Полученные файлы можно обработать "imgo" для получения большей степени сжатия. Как применять эти файлы, можно посмотреть по адресу: http://www.artlebedev.ru/tools/technogrette/img/png-2/
-* "imgo -bkgd#ffffff" устанавливает bKGD, после чего сжимает файл. Как использовать bKGD, можно узнать здесь: http://banzalik.ru/png24-ie6-bg/
-* "imgo -rt" создает рядом с PNG24+Alpha файл filename_imgcocmp_rt.png, c удаленной Alpha (показывает все содержимое, скрытое за прозрачностью)
-* "imgo -png8a"  конвертирует PNG24+Alpha в PNG8+Alpha (возможны потери в качестве), более подробно - зачем это надо, http://cssing.org.ua/2008/11/07/png-8-alpha/
+* `imgo file.png` — basic compression level (default), works relatively fast and applies only "safe" transformations. Recommended for images that must be displayed correctly by IE6.
 
-О преобразованиях
----------------------------
-Некоторые операции, позволяющие сжать файл базируются на смене типа файла, на более "подходящий" для данного (конкретного) изображения.
+* `imgo -b file.png` — advanced compression level (enabled with `-b` or `--brute` parameter), applies all the transformations available. Some resulting files (with transparency) may display incorrectly in IE6.
 
-Преобразования для формата PNG, все преобразования не влияют на картинку (не происходит визуального изменения изображения):
+* `imgo -m -b file.png` — maximum compression level, applies compression multiple times to a single file (enabled with -m or -multipass parameter). Sometimes this saves you a few extra bytes (usually less than 1% of total file size, but hardly more).
 
-* Из индексированного в полноцветное (PNG8 -> PNG24)
-* Понижение количества цветов  (например PNG8 (256 цветов) -> PNG8 (20 цветов))
-* tRNS в PNG+Alpha
-* Изменение глубины изображения (битности на канал)
-* Из Индексированного в GrayScale + Альфа
-* Из Полноцветного+alpha в Полноцветное tRNS
-* Полноцветный+alpha в GrayScale+alpha
-* GrayScale+alpha в GrayScale tRNS
-* чистка прозрачных областей (http://www.artlebedev.ru/tools/technogrette/img/png-3/)
+## Other optimizer features
 
-Преобразования для формата JPG, все преобразования не влияют на картинку (не происходит визуального изменения изображения):
+In addition to its main purpose (image compression), imgo provides a number of tools to fine-tune PNG image file format.
 
-* включение прогрессивного режима (progressive)
-* включение режима оптимизации (optimize)
+### Setting the bkgd chunk
 
-Используемые библиотеки
----------------------------
-* imagemagick
-* pngout
-* optipng
-* pngrewrite
-* exiftool
-* advpng
-* jpegtran
-* gifsicle
-* pngnq
-* defluff
-* bc
+The use of bKGD chunk is one of the graceful degradation techniques that makes pngfix hack unnecessary in IE6. The source of the problem is IE6 that incorrectly displays PNG24 images with alpha transparency.
 
-Установка в MAC OS X
----------------------------
-* [Устанавливаем](https://github.com/mxcl/homebrew/wiki/Installation "Устанавливаем") homebrew, если уже установлен - переходим дальше
-* Если у вас OS X Mountain Lion, тогда установите [X11](http://xquartz.macosforge.org/landing/ "X11")
-* Выполняем следующие команды в терминале:
+This is an example HTML5 log with alpha transparency:
 
-```shell
-brew install exiftool imagemagick optipng libjpeg gifsicle
+![Alpha-transparent HTML5 logo](http://img-fotki.yandex.ru/get/6101/1861097.22/0_79fd9_13413784_orig)
 
-formulas='pngout.rb  defluff.rb cryopng.rb imgo.rb'
-for package in $formulas
-do
-  brew install "https://raw.github.com/imgo/imgo-tools/master/Formula/"$package
-done
-```
-You may need to use `sudo` for brew, depending on your setup.
+In IE6, this looks like this:
 
-Установка в Linux Debian
----------------------------
+![alpha-transparent HTML5 logo in IE6](http://img-fotki.yandex.ru/get/6101/1861097.22/0_79dff_15ed20fb_orig)
 
-Часть используемого ПО распространяется только в виде бинарных файлов, в связи с чем есть некоторые трудности с запуском на x86 (не найден defluff).
+While AlphaImageLoader filter is a well-known fix for that, it's not the only one. If we specify a color for a bKGD chunk, IE6 will show a picture as if layered over a background of that color.
 
-```sh
-## storing current dir
-pushd . > /dev/null
+`imgo -bkgd#ffffff file.png` Logo on a white background:
 
-### Installing needed packages
-sudo apt-get install advancecomp libimage-exiftool-perl imagemagick \
-    optipng libjpeg-progs gifsicle pngnq \
-    tar unzip libpng-dev git
+![Logo on a white background](http://img-fotki.yandex.ru/get/6200/1861097.22/0_79e00_9028cea8_orig)
 
-### Installing additional software
-mkdir /tmp/imgo-installation/bin -p
-cd /tmp/imgo-installation
+`imgo -bkgd#ffc927 file.png` Logo on an orange background:
 
-# messages - log for warnings
-messages=/tmp/imgo-installation/messages
+![Logo on an orange background](http://img-fotki.yandex.ru/get/6201/1861097.22/0_79e01_a0d043af_orig)
 
-### I reccomend to launch commands above manually! One by one. It could be very-very sad bad because you can catch some errors. Use it at your own risk!
+Note that we do not remove transparency; instead, we replace grayish color drawn by IE by a specific one. With AlphaImageLoader filter applied, an image would still support semi-transparency. Other browsers ignore the bKGD chunk and display alpha transparency as they should.
 
-# pngout
-wget http://static.jonof.id.au/dl/kenutils/pngout-20120530-linux-static.tar.gz -O pngout.tar.gz
-if [ -e pngout.tar.gz ];
-then
-    tar -xvf pngout.tar.gz
-    cp pngout-20120530-linux-static/`uname -m`/pngout-static ./bin/pngout
-else
-    echo "   * pngout not installed" >> ${messages}
-fi
+### Transparent area clearing
 
-# defluff. WARNING! There are i686 and x86_64 binaries only
-wget https://github.com/imgo/imgo-tools/raw/master/src/defluff/defluff-0.3.2-linux-`uname -m`.zip -O defluff.zip
-if [ -e defluff.zip ];
-then
-    unzip defluff.zip
-    chmod a+x defluff
-    cp defluff /tmp/imgo-installation/bin
-else
-    echo "   * defluff not installed" >> ${messages}
-fi
+All PNG24 images with transparency go through the so-called "transparent area clearing" optimization.
 
-# cryopng
-wget http://frdx.free.fr/cryopng/cryopng-linux-x86.tgz -O cryo.tgz
-if [ -e cryo.tgz ];
-then
-    tar -zxf cryo.tgz
-    cp cryo-files/cryopng /tmp/imgo-installation/bin
-else
-    echo "   * cryopng not installed" >> ${messages}
-fi
+Simply put, each png24 with alpha transparency can be represented by two layers; the first one is the image itself, the second one is the transparency mask.
 
-# pngrewrite. building from sources. binaries only for win
-# Do you really need pngrewrite? http://entropymine.com/jason/pngrewrite/
-mkdir pngrewrite && cd pngrewrite/
-wget http://entropymine.com/jason/pngrewrite/pngrewrite-1.4.0.zip -O pngrewrite.zip
-if [ -e pngrewrite.zip ];
-then
-    unzip pngrewrite.zip
-    make
-    cp ./pngrewrite /tmp/imgo-installation/bin
-else
-    echo "   * pngrewrite not installed" >> ${messages}
-fi
-cd ..
+Test image (19.6 Kb):
 
-# imgo script. Yeah! Finally
-git clone git://github.com/imgo/imgo.git
-cp imgo/imgo /tmp/imgo-installation/bin/
+![Test image](http://img-fotki.yandex.ru/get/6101/1861097.22/0_79e02_dae7fe87_-1-orig)
 
-# copy binaries to your local ~/bin or global /usr/local/bin
-# mkdir -p ~/bin && cp /tmp/imgo-installation/bin/* ~/bin # or
-sudo cp /tmp/imgo-installation/bin/* /usr/local/bin/
+When separated into two parts, they look like this:
 
-# show warnings summary after install complete
-if [ -s "${messages}" ]; then cat ${messages}; fi
+The image itself (14.6 Kb):
 
-# dir restore and clean up
-popd > /dev/null
-rm -rf /tmp/imgo-installation
-```
+![The image](http://img-fotki.yandex.ru/get/6200/1861097.22/0_79e03_ef2d41a7_orig)
 
-Лицензия
----------------------------
-Данное ПО распространяется по Лицензии MIT.
+The alpha channel (the mask, 1.16 Kb):
 
-<!-- Yandex.Metrika counter -->
-<img src="//mc.yandex.ru/watch/12831025" style="position:absolute; left:-9999px;" alt="" />
-<!-- /Yandex.Metrika counter -->
+![The alpha channel](http://img-fotki.yandex.ru/get/6101/1861097.22/0_79e04_4c1907ac_orig)
+
+The original image contains redundant data that affects its size. imgo fills these areas with black.
+
+If we pass the original image through imgo and then separate it again, the image itself will look like this (3.27 Kb):
+
+![Transparent areas clearing](http://img-fotki.yandex.ru/get/6200/1861097.22/0_79e05_7e9f41bb_-1-orig)
+
+This method doesn't affect visible areas of the image, therefore this transformation is safe (i.e. lossless).
+
+Sometimes you need just the image itself without any transparency; if so, specify the `-rt` parameter:
+
+`imgo -rt file.png`
+
+This will create a new file file_imgo_rt.png that is the same as the original one but with transparency layer removed.
+
+### Converting to PNG8 with alpha transparency
+
+PNG8 supports two types of transparency:
+
+1. Binary transparency (a pixel is either completely transparent, or completely opaque). The same kind of transparency is supported by a GIF format. Binary transparency is most commonly used with PNG8.
+
+2. Alpha channel (a pixel can have any transparency on the scale from 0 to 255, with step 1).
+
+imgo allows for converting png24 with an alpha channel to png8 with an alpha channel. It's worth mentioning that png8 is limited by a 256 color palette, therefore color reduction will occur if the source image has many colors.
+
+HTML5 logo: PNG24 + Alpha channel (7,1 Kb)
+
+![PNG24 + Alpha channel](http://img-fotki.yandex.ru/get/6201/1861097.22/0_79fda_e54f08b0_orig)
+
+HTML5 Logo: PNG8 + Alpha channel (3.2 Kb)
+
+![PNG8 + Alpha channel](http://img-fotki.yandex.ru/get/6200/1861097.22/0_79e07_75eee8fc_orig)
+
+In addition to lower file size, PNG8 transparency is also a graceful degradation technique. The point is that IE6 doesn't show these images correctly, displaying all semi-transparent areas as fully transparent ones.
+
+`imgo -png8a file.png` After running this command, another file named file_png8a.png appears near the original file.png. You can compare these two and see if the reduction in quality is a reasonable trade-off for getting a smaller file.
+
+### Decomposing PNG24+Alpha into two files
+
+One of the possible ways to reduce file size of such images is decomposing them into two files.
+
+We have a test image (7.1 Kb):
+
+![Test image](http://img-fotki.yandex.ru/get/5606/1861097.22/0_79fdb_10d825bc_orig)
+
+By running `imgo -s file.png` , we get the following two files:
+
+The first one contains all opaque pixels (1.61 Kb):
+
+![All opaque pixels](http://img-fotki.yandex.ru/get/6101/1861097.22/0_79e09_d99329a3_orig)
+
+The second one contains all the semi-transparency (1.28 Kb):
+
+![All the semi-transparency](http://img-fotki.yandex.ru/get/6201/1861097.22/0_79e0a_fe97ab56_orig)
+
+By positioning these images one over the other, we get the original image.
+
+After running imgo -s file.png , the following 3 files are created near the original one:
+
+* `file_imgo_alpha.png` — PNG24, a layer with semi-transparent pixels only;
+* `file_imgo_crop.png` — PNG24, a layer with opaque pixels only;
+* `file_imgo_crop-nq8.png` — PNG8 made from `file_imgo_crop.png` (a lossy conversion)
+
+In most cases, you win in overall file size by combining a semi-transparent layer and PNG8. A separate PNG24 layer is provided mostly for visual comparison between PNG24 and PNG8 files: if the difference is subtle, this method is applicable to a particular image.
+
+## Downloading and installing
+
+Repository: http://github.com/imgo/imgo
+
+Installation manual (MacOS): https://github.com/imgo/imgo#readme
+
+Report bugs here: https://github.com/imgo/imgo/issues 
+
+We are monitoring new image compression utilities and techniques and embed the best methods into new versions of imgo.
+
+Subscribe to our github commits to stay in sync with the latest imgo updates.
